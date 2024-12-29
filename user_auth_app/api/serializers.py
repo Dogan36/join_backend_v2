@@ -16,3 +16,4 @@ class CustomUserSerializer(serializers.ModelSerializer):
         user.set_password(password)  # Passwort wird gehasht
         user.save()
         return user
+    
