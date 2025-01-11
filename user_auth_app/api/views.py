@@ -52,12 +52,12 @@ class PasswordResetRequestView(APIView):
 
         token = PasswordResetTokenGenerator().make_token(user)
         uid = urlsafe_base64_encode(force_bytes(user.pk))
-        reset_link = f"http://frontend-url/reset-password/{uid}/{token}/"
+        reset_link = f"http://localhost:5173//reset-password/{uid}/{token}/"
 
         send_mail(
             subject="Password Reset Request",
             message=f"Click the link to reset your password: {reset_link}",
-            from_email="noreply@example.com",
+            from_email="noreply@join.dogan-celik.com",
             recipient_list=[email],
         )
         return Response({"message": "Password reset link has been sent to your email"}, status=status.HTTP_200_OK)
