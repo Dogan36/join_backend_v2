@@ -1,4 +1,4 @@
-from rest_framework import status
+from rest_framework import status, views
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.authtoken.models import Token
@@ -8,34 +8,30 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes
 from django.core.mail import send_mail
 from django.contrib.auth import get_user_model
+from django.db import transaction
 
 
 
-class RegistrationView(APIView):
-    """
-    Registrierung eines neuen Benutzers
-    """
 
+
+class RegistrationView(views.APIView):
     def post(self, request, *args, **kwargs):
-        # Der Serializer für die Benutzerdaten
         serializer = CustomUserSerializer(data=request.data)
-
-        # Überprüfen, ob die Daten validiert sind
         if serializer.is_valid():
-            user = serializer.save()  # Benutzer wird erstellt
+            with transaction.atomic():  # Stellt sicher, dass alle Datenbankoperationen atomar ablaufen
+                user = serializer.save()  # Benutzer wird erstellt
 
-            # Token für den Benutzer erstellen
-            token, created = Token.objects.get_or_create(user=user)
+                # Token für den neuen User erstellen
+                token, created = Token.objects.get_or_create(user=user)
 
-            # Rückgabe der Benutzerdaten und des Tokens
-            return Response({
-                'user': serializer.data,
-                'token': token.key  # Das Token als Teil der Antwort
-            }, status=status.HTTP_201_CREATED)
+                # Rückgabe der Benutzerdaten und des Tokens
+                return Response({
+                    'user': serializer.data,
+                    'token': token.key
+                }, status=status.HTTP_201_CREATED)
         
-        # Wenn die Validierung fehlschlägt, gebe die Fehler zurück
+        # Bei fehlerhafter Validierung die Fehler zurückgeben
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
 
 User = get_user_model()
 
