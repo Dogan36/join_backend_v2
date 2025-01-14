@@ -1,12 +1,12 @@
 from rest_framework import serializers
 from workspaces.models import Workspace
 from django.contrib.auth import get_user_model
-
+from user_auth_app.api.serializers import CustomUserSerializer
 User = get_user_model()
 
 class WorkspaceSerializer(serializers.ModelSerializer):
     members = serializers.PrimaryKeyRelatedField(many=True, queryset=User.objects.all(), required=False)
-    
+    owner = CustomUserSerializer(read_only=True)
     class Meta:
         model = Workspace
         fields = ['id', 'name', 'members', 'owner', 'join_code']

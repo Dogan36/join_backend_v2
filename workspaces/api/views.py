@@ -7,15 +7,16 @@ from rest_framework.views import APIView
 from django.shortcuts import get_object_or_404
 
 class WorkspaceViewSet(viewsets.ModelViewSet):
-    queryset = Workspace.objects.all()
+    permission_classes = [IsAuthenticated]
     serializer_class = WorkspaceSerializer
 
     def get_queryset(self):
-        # Optionale Filterung, um nur die Workspaces anzuzeigen, zu denen der User gehört
-        user = self.request.user
-        return Workspace.objects.filter(members=user)
+        return Workspace.objects.filter(members=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
     
-class JoinWorkspace(APIView):
+class JoinWorkspaceViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request):

@@ -1,4 +1,4 @@
-from rest_framework import status, views
+from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.authtoken.models import Token
@@ -14,7 +14,7 @@ from django.db import transaction
 
 
 
-class RegistrationView(views.APIView):
+class RegistrationView(APIView):
     def post(self, request, *args, **kwargs):
         serializer = CustomUserSerializer(data=request.data)
         if serializer.is_valid():
