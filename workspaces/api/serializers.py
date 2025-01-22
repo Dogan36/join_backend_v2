@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from workspaces.models import Workspace
+from workspaces.models import Workspace, Category, Task, Subtask, Color
 from django.contrib.auth import get_user_model
 from user_auth_app.api.serializers import CustomUserSerializer
 User = get_user_model()
@@ -7,6 +7,7 @@ User = get_user_model()
 class WorkspaceSerializer(serializers.ModelSerializer):
     members = serializers.PrimaryKeyRelatedField(many=True, queryset=User.objects.all(), required=False)
     owner = CustomUserSerializer(read_only=True)
+    join_code = serializers.CharField(read_only=True)
     class Meta:
         model = Workspace
         fields = ['id', 'name', 'members', 'owner', 'join_code']
@@ -33,3 +34,40 @@ class WorkspaceSerializer(serializers.ModelSerializer):
             instance.members.set(members)
 
         return instance
+
+class SubtaskSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Subtask
+        fields = ['id', 'task', 'name', 'completed']
+    
+class TaskSerializer(serializers.ModelSerializer):
+    subtasks = SubtaskSerializer(many=True, read_only=True)
+    class Meta:
+        model = Task
+        fields = ['id', 'name', 'description', 'duedate', 'category', 'status', 'workspace', 'subtasks']
+
+    category = serializers.SlugRelatedField(
+        read_only=True,
+        slug_field='name'
+    )
+    subtasks = serializers.PrimaryKeyRelatedField(
+        many=True,
+        read_only=True
+    )
+    
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = ['id', 'name', 'color', 'workspace']
+
+    color = serializers.SlugRelatedField(
+        read_only=True,
+        slug_field='code'
+    )
+
+
+
+class ColorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Color
+        fields = ['id', 'name', 'code']

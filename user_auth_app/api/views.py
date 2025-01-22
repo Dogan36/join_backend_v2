@@ -7,13 +7,29 @@ from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes
 from django.core.mail import send_mail
-from django.contrib.auth import get_user_model
+from django.contrib.auth import get_user_model, authenticate
 from django.db import transaction
 
 
 
 
-
+class CustomLoginView(APIView):
+    def post(self, request, *args, **kwargs):
+        username = request.data.get('username')
+        password = request.data.get('password')
+        user = authenticate(username=username, password=password)
+        if user:
+            token, created = Token.objects.get_or_create(user=user)
+            return Response({
+                'user': {
+                    'id': user.id,
+                    'email': user.email,
+                    'name': user.name
+                },
+                'token': token.key
+            }, status=status.HTTP_200_OK)
+        return Response({"error": "Invalid Credentials"}, status=status.HTTP_400_BAD_REQUEST)
+    
 class RegistrationView(APIView):
     def post(self, request, *args, **kwargs):
         serializer = CustomUserSerializer(data=request.data)
