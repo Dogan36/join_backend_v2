@@ -64,7 +64,7 @@ class WorkspaceViewSet(viewsets.ModelViewSet):
             return Response({'message': 'You do not have permission to delete this workspace'}, status=status.HTTP_403_FORBIDDEN)
 
         workspace.delete()
-        return Response({'message': 'Workspace deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+        return Response({'message': 'Workspace deleted successfully'}, status=status.HTTP_200_OK)
     
 class InvitePerEmailView(APIView):
     permission_classes = [IsAuthenticated]
