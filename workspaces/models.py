@@ -2,7 +2,7 @@ from re import sub
 import uuid
 from django.db import models
 from django.contrib.auth import get_user_model
-
+from colors.models import Color
 User = get_user_model()
 
 class Workspace(models.Model):
@@ -16,13 +16,6 @@ class Workspace(models.Model):
             self.join_code = uuid.uuid4().hex[:8]  # Erstellt einen 8 Zeichen langen Hexadezimalcode
         super().save(*args, **kwargs)
 
-    def __str__(self):
-        return self.name
-
-class Color(models.Model):
-    name = models.CharField(max_length=100)
-    code = models.CharField(max_length=7)  # Hex-Farbcode, z.B. #FFFFFF
-    
     def __str__(self):
         return self.name
 

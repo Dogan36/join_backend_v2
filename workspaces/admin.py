@@ -4,6 +4,5 @@ from .models import Workspace, Category, Color, Task, Subtask
 # Register your models here.
 admin.site.register(Workspace)
 admin.site.register(Category)
-admin.site.register(Color)
 admin.site.register(Task)
 admin.site.register(Subtask)

@@ -2,8 +2,8 @@ from rest_framework import viewsets, permissions, status
 from rest_framework.permissions import IsAuthenticated
 
 from workspaces import models
-from .serializers import WorkspaceSerializer, CategorySerializer, ColorSerializer, SubtaskSerializer, TaskSerializer
-from workspaces.models import Workspace, Category, Color, Subtask, Task
+from .serializers import WorkspaceSerializer, CategorySerializer, SubtaskSerializer, TaskSerializer
+from workspaces.models import Workspace, Category, Subtask, Task
 from rest_framework.response import Response
 from django.contrib.auth.models import User
 from rest_framework.views import APIView
@@ -114,9 +114,6 @@ class CategoryViewSet(viewsets.ModelViewSet):
         return Category.objects.none()  # Keine Kategorien zurückgeben, wenn keine workspace_id vorhanden ist
 
 
-class ColorViewSet(viewsets.ModelViewSet):
-    queryset = Color.objects.all()
-    serializer_class = ColorSerializer
     
 class SubtaskViewSet(viewsets.ModelViewSet):
     queryset = Subtask.objects.all()

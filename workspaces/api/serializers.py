@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from workspaces.models import Workspace, Category, Task, Subtask, Color
+from workspaces.models import Workspace, Category, Task, Subtask
 from django.contrib.auth import get_user_model
 from user_auth_app.api.serializers import CustomUserSerializer
 User = get_user_model()
@@ -61,16 +61,6 @@ class TaskSerializer(serializers.ModelSerializer):
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
-        fields = ['id', 'name', 'color', 'workspace']
-
-    color = serializers.SlugRelatedField(
-        read_only=True,
-        slug_field='code'
-    )
+        fields = ['id', 'name', 'workspace']
 
 
-
-class ColorSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Color
-        fields = ['id', 'name', 'code']

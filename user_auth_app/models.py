@@ -1,6 +1,9 @@
+
+from typing import Required
 from django.contrib.auth.models import AbstractBaseUser,  PermissionsMixin
 from django.db import models
 from django.contrib.auth.models import BaseUserManager
+from colors.models import Color
 
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, name, password=None, **extra_fields):
@@ -29,10 +32,13 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     objects = CustomUserManager()
-
+    color = models.ForeignKey(Color, on_delete=models.CASCADE, blank=True, null=True)
+    avatar = models.CharField(max_length=2, blank=True, null=True)
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['name']
 
+    
+    
     def __str__(self):
         return self.email
     

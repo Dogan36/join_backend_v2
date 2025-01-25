@@ -1,10 +1,10 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import WorkspaceViewSet, InvitePerEmailView, CategoryViewSet, ColorViewSet, TaskViewSet, SubtaskViewSet
+from .views import WorkspaceViewSet, InvitePerEmailView, CategoryViewSet, TaskViewSet, SubtaskViewSet
 
 router = DefaultRouter()
 router.register(r'workspaces', WorkspaceViewSet, basename='workspace')
-router.register(r'colors', ColorViewSet, basename='workspace-color')
+
 
 
 urlpatterns = [
