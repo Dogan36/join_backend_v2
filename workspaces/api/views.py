@@ -1,5 +1,7 @@
 from rest_framework import viewsets, permissions, status
 from rest_framework.permissions import IsAuthenticated
+
+from workspaces import models
 from .serializers import WorkspaceSerializer, CategorySerializer, ColorSerializer, SubtaskSerializer, TaskSerializer
 from workspaces.models import Workspace, Category, Color, Subtask, Task
 from rest_framework.response import Response
@@ -89,20 +91,27 @@ class InvitePerEmailView(APIView):
             return Response({"error": f"Failed to send invitation: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class TaskViewSet(viewsets.ModelViewSet):
-    queryset = Task.objects.all()
+
     serializer_class = TaskSerializer
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        # Ermöglicht dem Benutzer nur, Tasks in Workspaces zu sehen, in denen er Mitglied ist
-        return self.queryset.filter(workspace__members=self.request.user)
-
+        # Hier extrahieren wir die workspaceId aus den URL-Parametern
+        workspace_id = self.kwargs.get('workspace_id')
+        if workspace_id:
+            return Task.objects.filter(workspace_id=workspace_id, workspace__members=self.request.user)
+        return Task.objects.none()  # Keine Tasks zurückgeben, wenn keine workspace_id vorhanden ist
+    
 class CategoryViewSet(viewsets.ModelViewSet):
-    queryset = Category.objects.all()
+    permission_classes = [IsAuthenticated]
     serializer_class = CategorySerializer
 
     def get_queryset(self):
-        # Ermöglicht dem Benutzer nur, Kategorien in Workspaces zu sehen, in denen er Mitglied ist
-        return self.queryset.filter(workspace__members=self.request.user)
+        # Hier extrahieren wir die workspaceId aus den URL-Parametern
+        workspace_id = self.kwargs.get('workspace_id')
+        if workspace_id:
+            return Category.objects.filter(workspace_id=workspace_id)
+        return Category.objects.none()  # Keine Kategorien zurückgeben, wenn keine workspace_id vorhanden ist
 
 
 class ColorViewSet(viewsets.ModelViewSet):
@@ -112,7 +121,6 @@ class ColorViewSet(viewsets.ModelViewSet):
 class SubtaskViewSet(viewsets.ModelViewSet):
     queryset = Subtask.objects.all()
     serializer_class = SubtaskSerializer
-
     def get_queryset(self):
         # Optional: Filter die Subtasks nach einem bestimmten Task
         task_id = self.request.query_params.get('task_id')

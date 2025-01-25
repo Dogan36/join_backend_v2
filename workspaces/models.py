@@ -1,3 +1,4 @@
+from re import sub
 import uuid
 from django.db import models
 from django.contrib.auth import get_user_model
@@ -48,7 +49,7 @@ class Task(models.Model):
     due_date = models.DateField()
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, related_name='tasks')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='todo')
-
+    
     def __str__(self):
         return self.name
 

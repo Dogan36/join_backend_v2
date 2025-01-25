@@ -5,7 +5,7 @@ from user_auth_app.api.serializers import CustomUserSerializer
 User = get_user_model()
 
 class WorkspaceSerializer(serializers.ModelSerializer):
-    members = serializers.PrimaryKeyRelatedField(many=True, queryset=User.objects.all(), required=False)
+    members = CustomUserSerializer(many=True, read_only=True)
     owner = CustomUserSerializer(read_only=True)
     join_code = serializers.CharField(read_only=True)
     class Meta:
@@ -36,24 +36,27 @@ class WorkspaceSerializer(serializers.ModelSerializer):
         return instance
 
 class SubtaskSerializer(serializers.ModelSerializer):
+    task = serializers.PrimaryKeyRelatedField(queryset=Task.objects.all())
     class Meta:
         model = Subtask
-        fields = ['id', 'task', 'name', 'completed']
-    
+        fields = ['id', 'name', 'done', 'task']
+
 class TaskSerializer(serializers.ModelSerializer):
+    workspace = serializers.PrimaryKeyRelatedField(
+        queryset=Workspace.objects.all(),
+        many=False
+    )
+    category = serializers.PrimaryKeyRelatedField(
+        queryset=Category.objects.all(),
+        allow_null=True,  # Erlaubt Null-Werte, falls keine Kategorie zugeordnet ist
+        required=False    # Optional, je nachdem, ob das Feld erforderlich ist
+    )
     subtasks = SubtaskSerializer(many=True, read_only=True)
+
     class Meta:
         model = Task
-        fields = ['id', 'name', 'description', 'duedate', 'category', 'status', 'workspace', 'subtasks']
+        fields = ['id', 'name', 'description', 'due_date', 'category', 'status', 'workspace', 'subtasks']
 
-    category = serializers.SlugRelatedField(
-        read_only=True,
-        slug_field='name'
-    )
-    subtasks = serializers.PrimaryKeyRelatedField(
-        many=True,
-        read_only=True
-    )
     
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
