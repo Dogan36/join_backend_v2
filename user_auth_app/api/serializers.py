@@ -1,7 +1,9 @@
 
+
 from rest_framework import serializers
 from colors.api.serializers import ColorSerializer
 from colors.models import Color
+from colors.api.serializers import ColorSerializer
 from user_auth_app.models import CustomUser, Contact
 
 
@@ -23,8 +25,12 @@ class CustomUserSerializer(serializers.ModelSerializer):
         return user
     
 class ContactSerializer(serializers.ModelSerializer):
-    user = CustomUser
-    color = ColorSerializer(read_only=True)
+    user = serializers.HiddenField(
+        default=serializers.CurrentUserDefault()
+    )
+    color = ColorSerializer(required=False)
     class Meta:
         model = Contact
         fields = ['id', 'name', 'email', 'user', 'phone', 'avatar', 'color']
+        
+    

@@ -106,10 +106,7 @@ class ContactViewSet(viewsets.ModelViewSet):
     
     def get_queryset(self):
         user = self.request.user
+        print(user)
         return Contact.objects.filter(user=user)
     
-    def perform_create(self, serializer):
-        """
-        Speichere den Benutzer beim Erstellen eines neuen Kontaktes automatisch als den Eigentümer des Kontakts.
-        """
-        serializer.save(user=self.request.user)
+   
