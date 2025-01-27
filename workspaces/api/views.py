@@ -2,7 +2,7 @@ from rest_framework import viewsets, permissions, status
 from rest_framework.permissions import IsAuthenticated
 
 from workspaces import models
-from .serializers import WorkspaceSerializer, CategorySerializer, SubtaskSerializer, TaskSerializer
+from .serializers import WorkspaceSerializer, CategorySerializer, SubtaskSerializer, TaskSerializer, ColorSerializer
 from workspaces.models import Workspace, Category, Subtask, Task
 from rest_framework.response import Response
 from django.contrib.auth.models import User
@@ -105,7 +105,7 @@ class TaskViewSet(viewsets.ModelViewSet):
 class CategoryViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     serializer_class = CategorySerializer
-
+    color = ColorSerializer
     def get_queryset(self):
         # Hier extrahieren wir die workspaceId aus den URL-Parametern
         workspace_id = self.kwargs.get('workspace_id')

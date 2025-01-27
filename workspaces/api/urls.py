@@ -17,6 +17,7 @@ workspace_router.register(r'tasks', TaskViewSet, basename='workspace-task')
 workspace_router.register(r'categories', CategoryViewSet, basename='workspace-category')
 workspace_router.register(r'subtasks', SubtaskViewSet, basename='workspace-subtask')
 
+
 # Inkludiere Sub-Router in der Haupt-URL-Konfiguration
 urlpatterns += [
     path('workspaces/<int:workspace_id>/', include(workspace_router.urls)),

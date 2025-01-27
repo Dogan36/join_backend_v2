@@ -1,8 +1,10 @@
-from rest_framework import status
+from rest_framework import status, viewsets
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.authtoken.models import Token
-from user_auth_app.api.serializers import CustomUserSerializer
+from user_auth_app.api.serializers import CustomUserSerializer, ContactSerializer
+from user_auth_app.models import Contact
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes
@@ -24,7 +26,9 @@ class CustomLoginView(APIView):
                 'user': {
                     'id': user.id,
                     'email': user.email,
-                    'name': user.name
+                    'name': user.name,
+                    'color': user.color.hex_value,
+                    'avatar': user.avatar
                 },
                 'token': token.key
             }, status=status.HTTP_200_OK)
@@ -94,3 +98,18 @@ class PasswordResetView(APIView):
         user.save()
 
         return Response({"message": "Password has been reset successfully"}, status=status.HTTP_200_OK)
+    
+class ContactViewSet(viewsets.ModelViewSet):
+    queryset = Contact.objects.all()
+    serializer_class = ContactSerializer
+    permission_classes = [IsAuthenticated]
+    
+    def get_queryset(self):
+        user = self.request.user
+        return Contact.objects.filter(user=user)
+    
+    def perform_create(self, serializer):
+        """
+        Speichere den Benutzer beim Erstellen eines neuen Kontaktes automatisch als den Eigentümer des Kontakts.
+        """
+        serializer.save(user=self.request.user)

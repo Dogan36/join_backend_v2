@@ -2,7 +2,8 @@
 from rest_framework import serializers
 from colors.api.serializers import ColorSerializer
 from colors.models import Color
-from user_auth_app.models import CustomUser
+from user_auth_app.models import CustomUser, Contact
+
 
 class CustomUserSerializer(serializers.ModelSerializer):
     # Passwortfeld, um das Passwort korrekt zu validieren und zu verschlüsseln
@@ -21,3 +22,9 @@ class CustomUserSerializer(serializers.ModelSerializer):
         user.save()
         return user
     
+class ContactSerializer(serializers.ModelSerializer):
+    user = CustomUser
+    color = ColorSerializer(read_only=True)
+    class Meta:
+        model = Contact
+        fields = ['id', 'name', 'email', 'user', 'phone', 'avatar', 'color']

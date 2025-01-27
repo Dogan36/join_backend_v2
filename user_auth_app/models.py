@@ -43,5 +43,15 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         return self.email
     
    
-
+class Contact(models.Model):
+    name = models.CharField(max_length=100)
+    email = models.EmailField()
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='contacts')
+    phone = models.CharField(max_length=20, blank=True)
+    avatar = models.CharField(max_length=2, blank=True, null=True)
+    color = models.ForeignKey(Color, on_delete=models.CASCADE)
+    
+    
+    def __str__(self):
+        return self.name
 
