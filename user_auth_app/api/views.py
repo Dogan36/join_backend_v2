@@ -106,7 +106,6 @@ class ContactViewSet(viewsets.ModelViewSet):
     
     def get_queryset(self):
         user = self.request.user
-        print(user)
         return Contact.objects.filter(user=user)
     
    

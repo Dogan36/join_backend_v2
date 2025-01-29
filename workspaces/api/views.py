@@ -1,7 +1,9 @@
+from venv import logger
 from rest_framework import viewsets, permissions, status
 from rest_framework.permissions import IsAuthenticated
 
 from workspaces import models
+import workspaces
 from .serializers import WorkspaceSerializer, CategorySerializer, SubtaskSerializer, TaskSerializer, ColorSerializer
 from workspaces.models import Workspace, Category, Subtask, Task
 from rest_framework.response import Response
@@ -10,13 +12,17 @@ from rest_framework.views import APIView
 from django.shortcuts import get_object_or_404
 from rest_framework.decorators import action
 from django.core.mail import send_mail
+import logging
 
+logger = logging.getLogger(__name__)
 class WorkspaceViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     serializer_class = WorkspaceSerializer
 
     def get_queryset(self):
         return Workspace.objects.filter(members=self.request.user)
+
+    permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
@@ -105,14 +111,17 @@ class TaskViewSet(viewsets.ModelViewSet):
 class CategoryViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     serializer_class = CategorySerializer
-    color = ColorSerializer
     def get_queryset(self):
-        # Hier extrahieren wir die workspaceId aus den URL-Parametern
         workspace_id = self.kwargs.get('workspace_id')
         if workspace_id:
             return Category.objects.filter(workspace_id=workspace_id)
         return Category.objects.none()  # Keine Kategorien zurückgeben, wenn keine workspace_id vorhanden ist
 
+    def perform_create(self, serializer):
+        workspace_id = self.kwargs.get('workspace_id')
+        workspace = get_object_or_404(Workspace, id=workspace_id)
+        serializer.validated_data['workspace'] = workspace
+        serializer.save()
 
     
 class SubtaskViewSet(viewsets.ModelViewSet):

@@ -3,6 +3,7 @@ from workspaces.models import Workspace, Category, Task, Subtask
 from django.contrib.auth import get_user_model
 from user_auth_app.api.serializers import CustomUserSerializer
 from colors.api.serializers import ColorSerializer
+from colors.models import Color
 User = get_user_model()
 
 class WorkspaceSerializer(serializers.ModelSerializer):
@@ -60,10 +61,17 @@ class TaskSerializer(serializers.ModelSerializer):
 
     
 class CategorySerializer(serializers.ModelSerializer):
-    color=ColorSerializer()
+    workspace = serializers.PrimaryKeyRelatedField(read_only=True)
+    color = ColorSerializer()
     class Meta:
         model = Category
         fields = ['id', 'name', 'workspace', 'color']
+    
+    def create(self, validated_data):
+        color_data = validated_data.pop('color')
+        color, created = Color.objects.get_or_create(**color_data)
+        category = Category.objects.create(color=color, **validated_data)
+        return category
         
 
 

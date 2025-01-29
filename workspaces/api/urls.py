@@ -6,7 +6,6 @@ router = DefaultRouter()
 router.register(r'workspaces', WorkspaceViewSet, basename='workspace')
 
 
-
 urlpatterns = [
     path('', include(router.urls)),
 ]
