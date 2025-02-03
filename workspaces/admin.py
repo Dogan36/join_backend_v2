@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Workspace, Category, Color, Task, Subtask
+from .models import Workspace, Category, Task, Subtask
 
 # Register your models here.
 admin.site.register(Workspace)

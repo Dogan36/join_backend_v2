@@ -3,9 +3,9 @@ from rest_framework import viewsets, permissions, status
 from rest_framework.permissions import IsAuthenticated
 
 from workspaces import models
-import workspaces
-from .serializers import WorkspaceSerializer, CategorySerializer, SubtaskSerializer, TaskSerializer, ColorSerializer
-from workspaces.models import Workspace, Category, Subtask, Task
+from workspaces.permissions import IsWorkspaceMember
+from .serializers import WorkspaceSerializer, CategorySerializer, TaskSerializer, ColorSerializer, SubtaskSerializer
+from workspaces.models import Workspace, Category, Task, Subtask
 from rest_framework.response import Response
 from django.contrib.auth.models import User
 from rest_framework.views import APIView
@@ -97,16 +97,35 @@ class InvitePerEmailView(APIView):
             return Response({"error": f"Failed to send invitation: {str(e)}"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class TaskViewSet(viewsets.ModelViewSet):
-
+    permission_classes = [IsAuthenticated, IsWorkspaceMember]
     serializer_class = TaskSerializer
-    permission_classes = [IsAuthenticated]
 
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        workspace_id = self.kwargs.get('workspace_id')
+        workspace = get_object_or_404(Workspace, id=workspace_id)
+        context['workspace'] = workspace
+        return context
+    
     def get_queryset(self):
-        # Hier extrahieren wir die workspaceId aus den URL-Parametern
         workspace_id = self.kwargs.get('workspace_id')
         if workspace_id:
-            return Task.objects.filter(workspace_id=workspace_id, workspace__members=self.request.user)
-        return Task.objects.none()  # Keine Tasks zurückgeben, wenn keine workspace_id vorhanden ist
+            return Task.objects.filter(workspace_id=workspace_id).select_related('category', 'workspace').prefetch_related('subtasks')
+        return Task.objects.none()
+    
+    def perform_create(self, serializer):
+        workspace_id = self.kwargs.get('workspace_id')
+        workspace = get_object_or_404(Workspace, id=workspace_id)
+        # Aufgabe wird mit dem Arbeitsbereich gespeichert
+        task = serializer.save(workspace=workspace)
+
+        # Hier fügst du die ausgewählten Kontakte hinzu, wenn sie im POST-Request enthalten sind
+        selected_contact_ids = self.request.data.get('selected_contacts', [])
+        if selected_contact_ids:
+            users = User.objects.filter(id__in=selected_contact_ids)
+            task.selected_contacts.set(users)  # Setzt die Kontakte für diese Aufgabe
+
+        return Response(serializer.data, status=201)
     
 class CategoryViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
@@ -123,14 +142,4 @@ class CategoryViewSet(viewsets.ModelViewSet):
         serializer.validated_data['workspace'] = workspace
         serializer.save()
 
-    
-class SubtaskViewSet(viewsets.ModelViewSet):
-    queryset = Subtask.objects.all()
-    serializer_class = SubtaskSerializer
-    def get_queryset(self):
-        # Optional: Filter die Subtasks nach einem bestimmten Task
-        task_id = self.request.query_params.get('task_id')
-        if task_id:
-            return self.queryset.filter(task_id=task_id)
-        return super().get_queryset()
     

@@ -38,26 +38,58 @@ class WorkspaceSerializer(serializers.ModelSerializer):
         return instance
 
 class SubtaskSerializer(serializers.ModelSerializer):
-    task = serializers.PrimaryKeyRelatedField(queryset=Task.objects.all())
     class Meta:
         model = Subtask
-        fields = ['id', 'name', 'done', 'task']
+        fields = ['id', 'name', 'is_completed']
+        read_only_fields = ['id']
 
 class TaskSerializer(serializers.ModelSerializer):
-    workspace = serializers.PrimaryKeyRelatedField(
-        queryset=Workspace.objects.all(),
-        many=False
-    )
+    workspace = serializers.PrimaryKeyRelatedField(read_only=True)  # Setzen in der View
     category = serializers.PrimaryKeyRelatedField(
         queryset=Category.objects.all(),
-        allow_null=True,  # Erlaubt Null-Werte, falls keine Kategorie zugeordnet ist
-        required=False    # Optional, je nachdem, ob das Feld erforderlich ist
+        required=True # Nur für Schreiboperationen
     )
-    subtasks = SubtaskSerializer(many=True, read_only=True)
-
+    subtasks = SubtaskSerializer(many=True, required=False)
+  
     class Meta:
         model = Task
-        fields = ['id', 'name', 'description', 'due_date', 'category', 'status', 'workspace', 'subtasks']
+        fields = ['id', 'name', 'description', 'due_date', 'category', 'selected_contacts', 'status', 'workspace', 'subtasks', 'prio']
+    
+    def create(self, validated_data):
+        subtasks_data = validated_data.pop('subtasks', [])
+        task = Task.objects.create(**validated_data)
+        for subtask_data in subtasks_data:
+            Subtask.objects.create(task=task, **subtask_data)
+        return task
+
+    def update(self, instance, validated_data):
+        subtasks_data = validated_data.pop('subtasks', [])
+    # Aktualisiere die Task-Instanz
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+
+    # Aktuelle Subtasks sammeln
+        current_subtasks = {subtask.id: subtask for subtask in instance.subtasks.all()}
+
+        for subtask_data in subtasks_data:
+            subtask_id = subtask_data.get('id', None)
+            if subtask_id:
+            # Aktualisiere vorhandene Subtasks
+                subtask = current_subtasks.pop(subtask_id, None)
+                if subtask:
+                    subtask.name = subtask_data.get('name', subtask.name)
+                    subtask.is_completed = subtask_data.get('is_completed', subtask.is_completed)
+                    subtask.save()
+            else:
+            # Erstelle neue Subtasks
+                Subtask.objects.create(task=instance, **subtask_data)
+
+    # Lösche Subtasks, die nicht im Update-Request enthalten sind
+        for subtask in current_subtasks.values():
+            subtask.delete()
+
+        return instance
 
     
 class CategorySerializer(serializers.ModelSerializer):

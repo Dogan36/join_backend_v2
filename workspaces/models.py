@@ -1,4 +1,4 @@
-from re import sub
+
 import uuid
 from django.db import models
 from django.contrib.auth import get_user_model
@@ -36,21 +36,28 @@ class Task(models.Model):
         ('todo', 'To Do'),
         ('inprogress', 'In Progress'),
     ]
+    PRIO_CHOICES = [
+        ('low', 'Low'),
+        ('medium', 'Medium'),
+        ('high', 'High'),
+    ]
     workspace = models.ForeignKey(Workspace, on_delete=models.CASCADE, related_name='tasks')
     name = models.CharField(max_length=100)
     description = models.TextField()
+    selected_contacts = models.ManyToManyField(User, related_name='selected_tasks', blank=True)
     due_date = models.DateField()
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, related_name='tasks')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='todo')
-    
+    prio = models.CharField(max_length=10, choices=PRIO_CHOICES, default='medium')
     def __str__(self):
         return self.name
-
+    
 class Subtask(models.Model):
-    done = models.BooleanField(default=False)
-    name = models.CharField(max_length=100)
     task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name='subtasks')
+    name = models.CharField(max_length=100)
+    is_completed = models.BooleanField(default=False)
+
 
     def __str__(self):
         return self.name
-    
+
