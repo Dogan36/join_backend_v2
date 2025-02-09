@@ -1,20 +1,20 @@
-from venv import logger
-from rest_framework import viewsets, permissions, status
+
+from rest_framework import viewsets, status
 from rest_framework.permissions import IsAuthenticated
 
 from workspaces import models
 from workspaces.permissions import IsWorkspaceMember
-from .serializers import WorkspaceSerializer, CategorySerializer, TaskSerializer, ColorSerializer, SubtaskSerializer
+from .serializers import WorkspaceSerializer, CategorySerializer, TaskSerializer, SubtaskSerializer
 from workspaces.models import Workspace, Category, Task, Subtask
 from rest_framework.response import Response
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from rest_framework.views import APIView
 from django.shortcuts import get_object_or_404
 from rest_framework.decorators import action
 from django.core.mail import send_mail
-import logging
+User = get_user_model()
 
-logger = logging.getLogger(__name__)
+
 class WorkspaceViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     serializer_class = WorkspaceSerializer
@@ -122,11 +122,36 @@ class TaskViewSet(viewsets.ModelViewSet):
         # Hier fügst du die ausgewählten Kontakte hinzu, wenn sie im POST-Request enthalten sind
         selected_contact_ids = self.request.data.get('selected_contacts', [])
         if selected_contact_ids:
-            users = User.objects.filter(id__in=selected_contact_ids)
-            task.selected_contacts.set(users)  # Setzt die Kontakte für diese Aufgabe
+            print(selected_contact_ids)
+            task.selected_contacts.set(selected_contact_ids)  # Setzt die Kontakte für diese Aufgabe
 
         return Response(serializer.data, status=201)
     
+    def perform_update(self, serializer):
+        workspace_id = self.kwargs.get('workspace_id')
+        workspace = get_object_or_404(Workspace, id=workspace_id)
+        # Aufgabe wird mit dem Arbeitsbereich gespeichert
+        task = serializer.save(workspace=workspace)
+        selected_contact_ids = self.request.data.get('selected_contacts', [])
+        if selected_contact_ids:
+            task.selected_contacts.set(selected_contact_ids)
+            
+class SubtasksViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAuthenticated, IsWorkspaceMember]
+    serializer_class = SubtaskSerializer
+
+    def get_queryset(self):
+        return Subtask.objects.filter(task__workspace_id=self.kwargs.get('workspace_id'))
+
+    def perform_create(self, serializer):
+        task_id = self.kwargs.get('task_id')
+        task = get_object_or_404(Task, id=task_id)
+        serializer.validated_data['task'] = task
+        serializer.save()
+
+    def perform_update(self, serializer):
+        serializer.save()
+   
 class CategoryViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     serializer_class = CategorySerializer

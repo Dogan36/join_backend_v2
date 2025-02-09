@@ -32,9 +32,9 @@ class Category(models.Model):
 class Task(models.Model):
     STATUS_CHOICES = [
         ('done', 'Done'),
-        ('awaiting_feedback', 'Awaiting Feedback'),
+        ('awaitingFeedback', 'Awaiting Feedback'),
         ('todo', 'To Do'),
-        ('inprogress', 'In Progress'),
+        ('inProgress', 'In Progress'),
     ]
     PRIO_CHOICES = [
         ('low', 'Low'),
@@ -43,7 +43,7 @@ class Task(models.Model):
     ]
     workspace = models.ForeignKey(Workspace, on_delete=models.CASCADE, related_name='tasks')
     name = models.CharField(max_length=100)
-    description = models.TextField()
+    description = models.TextField(blank=True, null=True)
     selected_contacts = models.ManyToManyField(User, related_name='selected_tasks', blank=True)
     due_date = models.DateField()
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, related_name='tasks')
