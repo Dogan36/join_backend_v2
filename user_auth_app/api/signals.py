@@ -5,18 +5,12 @@ from django.db.models import Count
 from ..models import CustomUser, Contact
 from colors.models import Color
 import random
-import logging
-
-logger = logging.getLogger(__name__)
-
 
 @receiver(pre_save, sender=CustomUser)
 def assign_random_color(sender, instance, **kwargs):
-    logger.info(f'signal pre_save triggered for {instance}')
     if not instance.pk:  # Überprüfe, ob das Objekt neu erstellt wird
         random_color_id = random.randint(6, 34)  # Wähle eine zufällige ID zwischen 1 und 5
-        color = Color.objects.get(id=random_color_id)  # Holt die Color Instanz mit dieser ID
-        logger.info(f'signal pre_save triggered for {instance}')
+        color = Color.objects.get(id=random_color_id)  # Holt die Color Instanz mit dieser ID)
         instance.color = color  # Weise die Farbe zu, bevor der Benutzer gespeichert wird
 
 
@@ -31,11 +25,9 @@ def assign_avatar(sender, instance, **kwargs):
         
 @receiver(pre_save, sender=Contact)
 def assign_random_color(sender, instance, **kwargs):
-    logger.info(f'signal pre_save triggered for {instance}')
     if not instance.pk:  # Überprüfe, ob das Objekt neu erstellt wird
         random_color_id = random.randint(6, 34)  # Wähle eine zufällige ID zwischen 1 und 5
         color = Color.objects.get(id=random_color_id)  # Holt die Color Instanz mit dieser ID
-        logger.info(f'signal pre_save triggered for {instance}')
         instance.color = color  # Weise die Farbe zu, bevor der Benutzer gespeichert wird
 
 
