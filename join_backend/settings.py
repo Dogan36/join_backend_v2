@@ -11,23 +11,29 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
-
+import os
+import environ
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
+env = environ.Env(
+    DEBUG=(bool, False)
+)
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-(h63au*0wp!!wnv41q-fh6hq63bk1^4l2_g-^&sk&^+#a=+5u0'
+# Pfad zur .env-Datei
+env_file = os.path.join(BASE_DIR, '.env')
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# Überprüfen, ob die Datei existiert und dann laden
+if os.path.exists(env_file):
+    env.read_env(env_file)
+else:
+    raise FileNotFoundError(f".env file not found in {env_file}")
 
-ALLOWED_HOSTS = [
-    
-]
+SECRET_KEY = env('SECRET_KEY')
+DEBUG = env('DEBUG')
+
+ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['localhost', '127.0.0.1'])
 
 CORS_ALLOW_ALL_ORIGINS = True
 
@@ -131,8 +137,14 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 AUTH_USER_MODEL = 'user_auth_app.CustomUser'
+
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587              # Port 587 für TLS
+EMAIL_USE_TLS = True          # TLS aktivieren
+EMAIL_HOST_USER = env('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
