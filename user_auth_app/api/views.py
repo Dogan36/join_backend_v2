@@ -77,7 +77,7 @@ class PasswordResetRequestView(APIView):
 
         token = PasswordResetTokenGenerator().make_token(user)
         uid = urlsafe_base64_encode(force_bytes(user.pk))
-        reset_link = f"http:/localhost:5173/reset-password/{uid}/{token}/"
+        reset_link = f"https:/join.dogan-celik.com/reset-password/{uid}/{token}/"
 
         send_mail(
             subject="Password Reset Request",
