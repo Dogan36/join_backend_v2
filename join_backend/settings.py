@@ -27,10 +27,10 @@ if os.path.exists(env_file):
     environ.Env.read_env(env_file)
 
 
-SECRET_KEY = env('SECRET_KEY')
-DEBUG = env('DEBUG')
+SECRET_KEY = env('SECRET_KEY', default="fallback-secret-key")
+DEBUG = env('DEBUG', default=False)
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'join-backend-v2.onrender.com', 'join.dogan-celik.com']
 
 CORS_ALLOW_ALL_ORIGINS = True
 
