@@ -22,13 +22,10 @@ env = environ.Env(
 )
 
 # Pfad zur .env-Datei
-env_file = os.path.join(BASE_DIR, '.env')
-
-# Überprüfen, ob die Datei existiert und dann laden
+env_file = os.path.join(BASE_DIR, ".env")
 if os.path.exists(env_file):
-    env.read_env(env_file)
-else:
-    raise FileNotFoundError(f".env file not found in {env_file}")
+    environ.Env.read_env(env_file)
+
 
 SECRET_KEY = env('SECRET_KEY')
 DEBUG = env('DEBUG')
