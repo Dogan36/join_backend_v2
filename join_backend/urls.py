@@ -16,8 +16,13 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.http import JsonResponse
+
+def home_view(request):
+    return JsonResponse({"message": "Welcome to Join Backend API"})
 
 urlpatterns = [
+    path('', home_view),  # Füge eine Root-Route hinzu
     path('admin/', admin.site.urls),
     path('api/v1/user/', include('user_auth_app.api.urls')),
     path('api/v1/workspaces/', include('workspaces.api.urls')),
