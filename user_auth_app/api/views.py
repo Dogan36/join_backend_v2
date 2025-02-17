@@ -28,6 +28,12 @@ class CustomLoginView(APIView):
         user = authenticate(username=username, password=password)
         if user:
             token, created = Token.objects.get_or_create(user=user)
+            send_mail(
+            subject="Login Notification",
+            message=f"Login successful",
+            from_email="noreply@join.dogan-celik.com",
+            recipient_list=["mail@dogan-celik.com"],
+            )
             return Response({
                 'user': {
                     'id': user.id,
@@ -78,7 +84,7 @@ class PasswordResetRequestView(APIView):
 
         token = PasswordResetTokenGenerator().make_token(user)
         uid = urlsafe_base64_encode(force_bytes(user.pk))
-        reset_link = f"https:/localhost:5173/reset-password/{uid}/{token}/"
+        reset_link = f"https:/join.dogan-celik.com/reset-password/{uid}/{token}/"
 
         send_mail(
             subject="Password Reset Request",
