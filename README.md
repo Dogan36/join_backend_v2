@@ -1,7 +1,7 @@
 
 # Join Backend
 
-Das **Join Backend** ist die Server-Seite für die **Join App**, die es Benutzern ermöglicht, Workspaces zu erstellen, zu verwalten und miteinander zu interagieren. Die API basiert auf **Django** und verwendet **Django Rest Framework (DRF)** zur Bereitstellung von RESTful Endpunkten. Die API verwendet **Token-basierte Authentifizierung** und bietet Funktionen wie Benutzerregistrierung, Passwortänderung und das Verwalten von Kontakten und Workspaces.
+Das **Join Backend** ist die Server-Seite für die **Join App**, die es Benutzern ermöglicht, Workspaces zu erstellen, Tasks zu verwalten und miteinander zu interagieren. Die API basiert auf **Django** und verwendet **Django Rest Framework (DRF)** zur Bereitstellung von RESTful Endpunkten. Die API verwendet **Token-basierte Authentifizierung** und bietet Funktionen wie Benutzerregistrierung, Passwortänderung und das Verwalten von Kontakten und Workspaces.
 
 ## Table of Contents
 - [Technologien](#technologien)
