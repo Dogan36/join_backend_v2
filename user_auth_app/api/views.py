@@ -44,6 +44,7 @@ class CustomLoginView(APIView):
         return Response({"error": "Incorrect password"}, status=status.HTTP_400_BAD_REQUEST)
     
 class RegistrationView(APIView):
+    authentication_classes = []
     def post(self, request, *args, **kwargs):
         serializer = CustomUserSerializer(data=request.data)
         if serializer.is_valid():
