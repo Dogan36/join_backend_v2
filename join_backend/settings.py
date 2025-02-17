@@ -86,7 +86,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'join_backend.wsgi.application'
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 
 # Falls RENDER-Umgebung genutzt wird, speichere die SQLite-Datenbank im persistenten Storage
 if "RENDER" in os.environ:
