@@ -86,7 +86,13 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'join_backend.wsgi.application'
 
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+# Falls RENDER-Umgebung genutzt wird, speichere die SQLite-Datenbank im persistenten Storage
+if "RENDER" in os.environ:
+    DB_PATH = "/var/lib/sqlite/db.sqlite3"  # Persistent Directory von Render
+else:
+    DB_PATH = os.path.join(BASE_DIR, "db.sqlite3")  # Lokales Verzeichnis
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
