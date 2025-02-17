@@ -34,7 +34,7 @@ def assign_avatar(sender, instance, **kwargs):
 @receiver(pre_save, sender=Contact)
 def assign_random_color(sender, instance, **kwargs):
     if not instance.pk:  # Überprüfe, ob das Objekt neu erstellt wird
-        random_color_id = random.randint(6, 34)  # Wähle eine zufällige ID zwischen 1 und 5
+        random_color_id = random.randint(1, 30)  # Wähle eine zufällige ID zwischen 1 und 5
         color = Color.objects.get(id=random_color_id)  # Holt die Color Instanz mit dieser ID
         instance.color = color  # Weise die Farbe zu, bevor der Benutzer gespeichert wird
 
