@@ -37,12 +37,13 @@ CORS_ALLOW_ALL_ORIGINS = True
 # Application definition
 
 INSTALLED_APPS = [
+    'django.contrib.staticfiles',
+    "whitenoise.runserver_nostatic",  # Whitenoise für statische Dateien
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'django.contrib.staticfiles',
     'rest_framework',
     'colors',
     'user_auth_app',
