@@ -11,20 +11,31 @@ from django.utils.encoding import force_bytes
 from django.core.mail import send_mail
 from django.contrib.auth import get_user_model, authenticate
 from django.db import transaction
-
+from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiResponse
 
 class CustomLoginView(APIView):
+    @extend_schema(
+        request={
+            'username': OpenApiParameter("username", str, description="Username", required=True),
+            'password': OpenApiParameter("password", str, description="Password", required=True),
+        },
+        responses={
+            200: OpenApiResponse(
+                description="Login successful",
+                response=CustomUserSerializer  # Direkt auf den Serializer verweisen
+            ),
+            400: OpenApiResponse(description="Incorrect password"),
+            404: OpenApiResponse(description="User does not exist"),
+        }
+    )
+    
     def post(self, request, *args, **kwargs):
         username = request.data.get('username')
         password = request.data.get('password')
-
-        # Überprüfe, ob ein Benutzer mit diesem Benutzernamen existiert.
         try:
             user_obj = User.objects.get(email=username)
         except User.DoesNotExist:
             return Response({"error": "User does not exist"}, status=status.HTTP_404_NOT_FOUND)
-
-        # Versuche, den Benutzer zu authentifizieren.
         user = authenticate(username=username, password=password)
         if user:
             token, created = Token.objects.get_or_create(user=user)
@@ -45,12 +56,21 @@ class CustomLoginView(APIView):
                 },
                 'token': token.key
             }, status=status.HTTP_200_OK)
-
-        # Falls die Authentifizierung fehlschlägt, liegt das Passwort falsch.
         return Response({"error": "Incorrect password"}, status=status.HTTP_400_BAD_REQUEST)
+    
     
 class RegistrationView(APIView):
     authentication_classes = []
+    @extend_schema(
+        request=CustomUserSerializer,
+        responses={
+            201: OpenApiResponse(
+                description="User successfully registered",
+                response=CustomUserSerializer
+            ),
+            400: OpenApiResponse(description="Invalid user data")
+        }
+    )
     def post(self, request, *args, **kwargs):
         serializer = CustomUserSerializer(data=request.data)
         if serializer.is_valid():
@@ -72,20 +92,25 @@ class RegistrationView(APIView):
 User = get_user_model()
 
 class PasswordResetRequestView(APIView):
+    @extend_schema(
+        request=OpenApiParameter("email", str, description="User's email address", required=True),
+        responses={
+            200: OpenApiResponse(description="Password reset link sent successfully"),
+            400: OpenApiResponse(description="Email is required"),
+            404: OpenApiResponse(description="User with this email does not exist")
+        }
+    )
     def post(self, request):
         email = request.data.get('email')
         if not email:
             return Response({"error": "Email is required"}, status=status.HTTP_400_BAD_REQUEST)
-
         try:
             user = User.objects.get(email=email)
         except User.DoesNotExist:
             return Response({"error": "User with this email does not exist"}, status=status.HTTP_404_NOT_FOUND)
-
         token = PasswordResetTokenGenerator().make_token(user)
         uid = urlsafe_base64_encode(force_bytes(user.pk))
         reset_link = f"https:/join.dogan-celik.com/reset-password/{uid}/{token}/"
-
         send_mail(
             subject="Password Reset Request",
             message=f"Click the link to reset your password: {reset_link}",
@@ -96,26 +121,43 @@ class PasswordResetRequestView(APIView):
     
     
 class PasswordResetView(APIView):
+    @extend_schema(
+       parameters=[
+            OpenApiParameter('uidb64', str, description='User ID encoded in base64', required=True),
+            OpenApiParameter('token', str, description='Password reset token', required=True),
+        ],
+        responses={
+            200: OpenApiResponse(description="Password reset successfully"),
+            400: OpenApiResponse(description="Invalid UID or expired token")
+        }
+    )
     def post(self, request, uidb64, token):
         new_password = request.data.get('password')
         if not new_password:
             return Response({"error": "Password is required"}, status=status.HTTP_400_BAD_REQUEST)
-
         try:
             uid = urlsafe_base64_decode(uidb64).decode()
             user = User.objects.get(pk=uid)
         except (User.DoesNotExist, ValueError):
             return Response({"error": "Invalid UID"}, status=status.HTTP_400_BAD_REQUEST)
-
         if not PasswordResetTokenGenerator().check_token(user, token):
             return Response({"error": "Invalid or expired token"}, status=status.HTTP_400_BAD_REQUEST)
-
         user.set_password(new_password)
         user.save()
-
         return Response({"message": "Password has been reset successfully"}, status=status.HTTP_200_OK)
 
 class ChangePasswordView(APIView):
+    @extend_schema(
+         request={
+             
+            'oldPassword': OpenApiParameter("oldPassword", str, description="Old password", required=True),
+            'newPassword': OpenApiParameter("newPassword", str, description="New password", required=True)
+        },
+        responses={
+            200: OpenApiResponse(description="Password changed successfully"),
+            400: OpenApiResponse(description="Incorrect old password or missing new password")
+        }
+    )
     def post(self, request, *args, **kwargs):
         user = request.user  # Annahme: der Benutzer ist authentifiziert (z.B. über TokenAuthentication)
         old_password = request.data.get('oldPassword')
@@ -136,15 +178,27 @@ class ChangePasswordView(APIView):
 
 class UpdateProfileView(APIView):
     permission_classes = [IsAuthenticated]
-
+    @extend_schema(
+        request={
+            "name": OpenApiParameter("name", str, description="User's name", required=True),
+            "email": OpenApiParameter("email", str, description="User's email", required=True),
+            "phone": OpenApiParameter("phone", str, description="User's phone number", required=False)
+        },
+        responses={
+            200: OpenApiResponse(
+                description="Profile updated successfully",
+                response=CustomUserSerializer
+            ),
+            400: OpenApiResponse(description="Name and email are required"),
+            404: OpenApiResponse(description="User not found"),
+            400: OpenApiResponse(description="Email is already taken")
+        }
+    )
     def post(self, request, *args, **kwargs):
         user = request.user
-        
-        # Hole die Felder aus den Request-Daten
         name = request.data.get('name')
         email = request.data.get('email')
         phone = request.data.get('phone')
-
         existing_user = User.objects.filter(email=email).exclude(pk=user.pk).first()
         if existing_user:
             return Response(
@@ -156,14 +210,10 @@ class UpdateProfileView(APIView):
                 {"error": "Name and email are required."},
                 status=status.HTTP_400_BAD_REQUEST
             )
-
-        # Aktualisiere die Felder
         user.name = name
         user.email = email
         user.phone = phone 
-        
         user.save()
-
         return Response(
             {
                 "message": "Profile updated successfully.",
@@ -179,11 +229,19 @@ class UpdateProfileView(APIView):
             status=status.HTTP_200_OK
         )
    
+   
 class ContactViewSet(viewsets.ModelViewSet):
     queryset = Contact.objects.all()
     serializer_class = ContactSerializer
     permission_classes = [IsAuthenticated]
-    
+    @extend_schema(
+        responses={
+            200: OpenApiResponse(
+                description="List of contacts",
+                response=ContactSerializer(many=True)
+            )
+        }
+    )
     def get_queryset(self):
         user = self.request.user
         return Contact.objects.filter(user=user)

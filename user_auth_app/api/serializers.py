@@ -14,7 +14,6 @@ class CustomUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
         fields = ['id', 'email', 'name', 'password', 'color', 'avatar', 'phone']
-
     def create(self, validated_data):
         password = validated_data.pop('password')
         user = CustomUser(**validated_data)

@@ -116,6 +116,10 @@ class CategorySerializer(serializers.ModelSerializer):
         category = Category.objects.create(color=color, **validated_data)
         return category
         
+        
+class InviteEmailSerializer(serializers.Serializer):
+    email = serializers.EmailField(required=True)
+    join_code = serializers.CharField(required=True)
 
 
 
