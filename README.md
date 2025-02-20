@@ -51,11 +51,22 @@ env\Scripts\activate     # Für Windows
 pip install -r requirements.txt
 ```
 
-### Schritt 4: Datenbank einrichten
+### Schritt 5: .env Datei erstellen
+
+Erstelle eine .env-Datei im Stammverzeichnis deines Projekts und füge folgende Variablen hinzu:
+  
+```bash
+SECRET_KEY='dein-geheimer-django-schlüssel'
+EMAIL_HOST_USER='deine-email@example.com'
+EMAIL_HOST_PASSWORD='dein-email-passwort'
+DEBUG=false 
+  ```
+
+### Schritt 5: Datenbank erstellen
 
 1. **Datenbank konfigurieren** (Falls PostgreSQL verwendet wird)
    
-   Bearbeite `settings.py`, um deine Datenbankverbindung zu konfigurieren. 
+   Füge `DATABASE_URL`- Variable in -env Datei hinzu um deine Datenbankverbindung zu konfigurieren. 
 
 2. **Migrations durchführen**
 
@@ -63,13 +74,13 @@ pip install -r requirements.txt
    python manage.py migrate
    ```
 
-### Schritt 5: Erstelle ein Superuser-Konto (optional)
+### Schritt 6: Erstelle ein Superuser-Konto (optional)
 
 ```bash
 python manage.py createsuperuser
 ```
 
-### Schritt 6: Entwicklungsserver starten
+### Schritt 7: Entwicklungsserver starten
 
 ```bash
 python manage.py runserver
