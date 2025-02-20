@@ -40,9 +40,9 @@ cd join_backend_v2
 ### Schritt 2: Virtuelle Umgebung erstellen und aktivieren
 
 ```bash
-python -m venv venv
+python -m venv env
 source venv/bin/activate  # Für Linux/MacOS
-venv\Scripts\activate     # Für Windows
+env\Scripts\activate     # Für Windows
 ```
 
 ### Schritt 3: Abhängigkeiten installieren
