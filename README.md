@@ -51,7 +51,7 @@ env\Scripts\activate     # Für Windows
 pip install -r requirements.txt
 ```
 
-### Schritt 5: .env Datei erstellen
+### Schritt 4: .env Datei erstellen
 
 Erstelle eine .env-Datei im Stammverzeichnis deines Projekts und füge folgende Variablen hinzu:
   
