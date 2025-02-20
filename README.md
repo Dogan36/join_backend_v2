@@ -34,6 +34,7 @@ Das **Join Backend** ist die Server-Seite für die **Join App**, die es Benutzer
 
 ```bash
 git clone https://github.com/Dogan36/join_backend_v2.git
+cd join_backend_v2
 ```
 
 ### Schritt 2: Virtuelle Umgebung erstellen und aktivieren
@@ -41,7 +42,7 @@ git clone https://github.com/Dogan36/join_backend_v2.git
 ```bash
 python -m venv venv
 source venv/bin/activate  # Für Linux/MacOS
-venv\Scriptsctivate     # Für Windows
+venv\Scripts\activate     # Für Windows
 ```
 
 ### Schritt 3: Abhängigkeiten installieren
