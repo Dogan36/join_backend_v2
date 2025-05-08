@@ -31,9 +31,21 @@ if os.path.exists(env_file):
 SECRET_KEY = env('SECRET_KEY', default="fallback-secret-key")
 DEBUG = env('DEBUG', default=False)
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = [
+    'join-api.dogan-celik.com',
+    '34.140.59.66',
+]
 
-CORS_ALLOW_ALL_ORIGINS = True
+
+if DEBUG:
+    CORS_ALLOW_ALL_ORIGINS = True
+else:
+    CORS_ALLOW_ALL_ORIGINS = False
+    CORS_ALLOWED_ORIGINS = ["https://join.dogan-celik.com"]
+
+
+
+
 
 # Application definition
 
