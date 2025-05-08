@@ -72,42 +72,42 @@ class TaskSerializer(serializers.ModelSerializer):
         return task
 
     def update(self, instance, validated_data):
-    subtasks_data = validated_data.pop('subtasks', None)
-    selected_contacts = validated_data.pop('selected_contacts', None)
+        subtasks_data = validated_data.pop('subtasks', None)
+        selected_contacts = validated_data.pop('selected_contacts', None)
 
-    # Aktualisiere alle anderen Felder des Tasks
-    for attr, value in validated_data.items():
-        setattr(instance, attr, value)
-    instance.save()
+        # Aktualisiere alle anderen Felder des Tasks
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
 
-    # Aktualisiere die Many-to-Many-Beziehung
-    if selected_contacts is not None:
-        instance.selected_contacts.set(selected_contacts)
+        # Aktualisiere die Many-to-Many-Beziehung
+        if selected_contacts is not None:
+            instance.selected_contacts.set(selected_contacts)
 
-    if subtasks_data is not None:
-        # Bestehende Subtasks in einem Dictionary sammeln (Key: subtask.id)
-        current_subtasks = {subtask.id: subtask for subtask in instance.subtasks.all()}
-        incoming_ids = []
+        if subtasks_data is not None:
+            # Bestehende Subtasks in einem Dictionary sammeln (Key: subtask.id)
+            current_subtasks = {subtask.id: subtask for subtask in instance.subtasks.all()}
+            incoming_ids = []
 
-        for subtask_data in subtasks_data:
-            subtask_id = subtask_data.get('id')
-            if subtask_id and subtask_id in current_subtasks:
-                # Bestehendes Subtask updaten
-                subtask = current_subtasks[subtask_id]
-                for attr, value in subtask_data.items():
-                    setattr(subtask, attr, value)
-                subtask.save()
-                incoming_ids.append(subtask_id)
-            else:
-                # Neues Subtask anlegen
-                Subtask.objects.create(task=instance, **subtask_data)
+            for subtask_data in subtasks_data:
+                subtask_id = subtask_data.get('id')
+                if subtask_id and subtask_id in current_subtasks:
+                    # Bestehendes Subtask updaten
+                    subtask = current_subtasks[subtask_id]
+                    for attr, value in subtask_data.items():
+                        setattr(subtask, attr, value)
+                    subtask.save()
+                    incoming_ids.append(subtask_id)
+                else:
+                    # Neues Subtask anlegen
+                    Subtask.objects.create(task=instance, **subtask_data)
 
-        # Lösche Subtasks, die nicht mehr in den neuen Daten vorkommen
-        for subtask_id, subtask in current_subtasks.items():
-            if subtask_id not in incoming_ids:
-                subtask.delete()
+            # Lösche Subtasks, die nicht mehr in den neuen Daten vorkommen
+            for subtask_id, subtask in current_subtasks.items():
+                if subtask_id not in incoming_ids:
+                    subtask.delete()
 
-    return instance
+        return instance
 
     
 class CategorySerializer(serializers.ModelSerializer):
