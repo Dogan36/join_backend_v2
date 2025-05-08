@@ -174,3 +174,12 @@ REST_FRAMEWORK = {
 
 
 PORT = os.getenv("PORT", "8000")
+
+CORS_ALLOW_METHODS = [
+    "DELETE",
+    "GET",
+    "OPTIONS",
+    "PATCH",
+    "POST",
+    "PUT",
+]
